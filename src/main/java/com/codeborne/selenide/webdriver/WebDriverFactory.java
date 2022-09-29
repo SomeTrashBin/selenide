@@ -103,7 +103,7 @@ public class WebDriverFactory {
       if (config.driverManagerEnabled()) {
         webdriverFactory.setupWebdriverBinary();
       }
-      System.setProperty("webdriver.http.factory", "selenide-netty-client-factory");
+      System.setProperty("webdriver.http.factory", "jdk-http-client");
       return webdriverFactory.create(config, browser, proxy, browserDownloadsFolder);
     }
   }
