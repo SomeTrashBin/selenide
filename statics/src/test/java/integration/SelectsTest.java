@@ -2,12 +2,17 @@ package integration;
 
 import com.codeborne.selenide.SelenideElement;
 import com.codeborne.selenide.ex.ElementNotFound;
+import com.codeborne.selenide.ex.InvalidStateException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 
+import static com.codeborne.selenide.CollectionCondition.size;
+import static com.codeborne.selenide.Condition.disabled;
 import static com.codeborne.selenide.Condition.empty;
+import static com.codeborne.selenide.Condition.enabled;
 import static com.codeborne.selenide.Condition.exactText;
+import static com.codeborne.selenide.Condition.exactValue;
 import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Condition.partialText;
 import static com.codeborne.selenide.Condition.partialTextCaseSensitive;
@@ -15,6 +20,7 @@ import static com.codeborne.selenide.Condition.selected;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.textCaseSensitive;
 import static com.codeborne.selenide.Condition.value;
+import static com.codeborne.selenide.Configuration.timeout;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$x;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,7 +77,7 @@ final class SelectsTest extends IntegrationTest {
 
   @Test
   void userCanGetSelectedOptionValue_selectHasNoOptions() {
-    assertThat($("select#empty-select").getSelectedOptionValue()).isNull();
+    assertThat($("select#empty-select").getSelectedOptionValue()).isEqualTo("");
   }
 
   @Test
@@ -89,7 +95,7 @@ final class SelectsTest extends IntegrationTest {
 
   @Test
   void userCanGetSelectedOptionText_selectHasNoOptions() {
-    assertThat($("select#empty-select").getSelectedOptionText()).isNull();
+    assertThat($("select#empty-select").getSelectedOptionText()).isEqualTo("");
   }
 
   @Test
@@ -100,7 +106,7 @@ final class SelectsTest extends IntegrationTest {
   }
 
   @Test
-  void selectOptionByValue_errorMessage() {
+  void selectOptionByValue_optionNotFound() {
     assertThatThrownBy(() -> {
       SelenideElement select = $(By.xpath("//select[@name='domain']"));
       select.selectOptionByValue("wrong-value");
@@ -110,13 +116,25 @@ final class SelectsTest extends IntegrationTest {
   }
 
   @Test
-  void selectOptionByText_errorMessage() {
+  void selectOptionByText_optionNotFound() {
     assertThatThrownBy(() -> {
       SelenideElement select = $(By.xpath("//select[@name='domain']"));
       select.selectOption("wrong-text");
     })
       .isInstanceOf(ElementNotFound.class)
-      .hasMessageContaining("Element not found {By.xpath: //select[@name='domain']/option[text:wrong-text]}");
+      .hasMessageStartingWith("Element not found {By.xpath: //select[@name='domain']/option[text:wrong-text]}")
+      .hasMessageContaining("Expected: exist");
+  }
+
+  @Test
+  void selectMultipleOptionsByText_optionsNotFound() {
+    assertThatThrownBy(() -> {
+      SelenideElement select = $(By.xpath("//select[@name='domain']"));
+      select.selectOption("wrong-text", "@livemail.ru", "another-wrong");
+    })
+      .isInstanceOf(ElementNotFound.class)
+      .hasMessageStartingWith("Element not found {By.xpath: //select[@name='domain']/option[text:wrong-text,another-wrong]}")
+      .hasMessageContaining("Expected: exist");
   }
 
   @Test
@@ -140,15 +158,7 @@ final class SelectsTest extends IntegrationTest {
       .isEqualTo("@мыло.ру");
   }
 
-  @Test()
-  void throwsElementNotFoundWithOptionsText() {
-    assertThatThrownBy(() -> $x("//select[@name='domain']").selectOption("unexisting-option"))
-      .isInstanceOf(ElementNotFound.class)
-      .hasMessageStartingWith(
-        String.format("Element not found {By.xpath: //select[@name='domain']/option[text:unexisting-option]}%nExpected: exist"));
-  }
-
-  @Test()
+  @Test
   void throwsElementNotFoundWithOptionsIndex() {
     assertThatThrownBy(() -> $x("//select[@name='domain']").selectOption(999))
       .isInstanceOf(ElementNotFound.class)
@@ -244,7 +254,7 @@ final class SelectsTest extends IntegrationTest {
     $("#cars").shouldHave(partialTextCaseSensitive("Saab").because("Option with text `Saab` is selected"));
   }
 
-  @Test()
+  @Test
   void throwsAssertionErrorForSelectedElementsWithDifferentTextOrCase() {
     $("#hero").selectOptionByValue("john mc'lain");
     assertThatThrownBy(() -> $("#hero").shouldHave(text("Denzel Washington")))
@@ -312,5 +322,139 @@ final class SelectsTest extends IntegrationTest {
     assertThatThrownBy(() -> $("h1").getSelectedOptionValue())
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessageStartingWith("Expected <select>, but received: <h1>");
+  }
+
+  @Test
+  void selectOptionByText_disabledSelect() {
+    assertThatThrownBy(() -> $("#disabled-select").selectOption("Anna"))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#disabled-select]: Cannot select option in a disabled select");
+  }
+
+  @Test
+  void selectOptionByIndex_disabledSelect() {
+    assertThatThrownBy(() -> $("#disabled-select").selectOption(0))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#disabled-select]: Cannot select option in a disabled select");
+  }
+
+  @Test
+  void selectOptionContainingText_notFound() {
+    assertThatThrownBy(() -> $("select#gender").selectOptionContainingText("ale", "emale", "third", "fourth"))
+      .isInstanceOf(ElementNotFound.class)
+      .hasMessageContaining("Element not found {select#gender/option[text containing:third,fourth]}");
+  }
+
+  @Test
+  void selectOptionContainingText_disabledSelect() {
+    assertThatThrownBy(() -> $("#disabled-select").selectOptionContainingText("Arnold"))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#disabled-select]: Cannot select option in a disabled select");
+  }
+
+  @Test
+  void selectOptionByValue_disabledSelect() {
+    assertThatThrownBy(() -> $("#disabled-select").selectOptionByValue("mickey rourke"))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#disabled-select]: Cannot select option in a disabled select");
+  }
+
+  @Test
+  void selectOptionByText_disabledOption() {
+    assertThatThrownBy(() -> $("#cars").selectOption("Zhiguli"))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#cars/option[text:Zhiguli]]: Cannot select a disabled option");
+  }
+
+  @Test
+  void selectMultipleOptionsByText_disabledOption() {
+    assertThatThrownBy(() -> $("#cars").selectOption("Volvo", "Audi", "Zhiguli", "Saab"))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#cars/option[text:Zhiguli]]: Cannot select a disabled option");
+  }
+
+  @Test
+  void selectMultipleOptionsByText_disabledOptions() {
+    assertThatThrownBy(() -> $("#cars").selectOption("Lada", "Volvo", "Audi", "Zhiguli", "Saab"))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#cars/option[text:Lada,Zhiguli]]: Cannot select a disabled option");
+  }
+
+  @Test
+  void selectOptionByIndex_disabledOption() {
+    assertThatThrownBy(() -> $("#cars").selectOption(4))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#cars/option[index:4]]: Cannot select a disabled option");
+  }
+
+  @Test
+  void selectMultipleOptionsByIndex_disabledOption() {
+    assertThatThrownBy(() -> $("#cars").selectOption(1, 2, 4))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#cars/option[index:4]]: Cannot select a disabled option");
+  }
+
+  @Test
+  void selectMultipleOptionsByIndex_disabledOptions() {
+    assertThatThrownBy(() -> $("#cars").selectOption(1, 2, 4, 5))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#cars/option[index:4,5]]: Cannot select a disabled option");
+  }
+
+  @Test
+  void selectOptionContainingText_disabledOption() {
+    assertThatThrownBy(() -> $("#cars").selectOptionContainingText("higul"))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#cars/option[text containing:higul]]: Cannot select a disabled option");
+  }
+
+  @Test
+  void selectMultipleOptionsContainingText_disabledOptions() {
+    assertThatThrownBy(() -> $("#cars").selectOptionContainingText("higul", "ada"))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#cars/option[text containing:higul,ada]]: Cannot select a disabled option");
+  }
+
+  @Test
+  void selectOptionByValue_disabledOption() {
+    assertThatThrownBy(() -> $("#cars").selectOptionByValue("zhiguli"))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#cars/option[value:zhiguli]]: Cannot select a disabled option");
+  }
+
+  @Test
+  void selectMultipleOptionsByValue_disabledOption() {
+    assertThatThrownBy(() -> $("#cars").selectOptionByValue("opel", "zhiguli", "audi"))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#cars/option[value:zhiguli]]: Cannot select a disabled option");
+  }
+
+  @Test
+  void selectMultipleOptionsByValue_disabledOptions() {
+    assertThatThrownBy(() -> $("#cars").selectOptionByValue("opel", "zhiguli", "audi", "lada"))
+      .isInstanceOf(InvalidStateException.class)
+      .hasMessageContaining("Invalid element state [#cars/option[value:zhiguli,lada]]: Cannot select a disabled option");
+  }
+
+  @Test
+  void canCheckOptionsOfDisabledSelect() {
+    $("#disabled-select").getSelectedOptions().shouldHave(size(1));
+    $("#disabled-select").getSelectedOption().shouldHave(exactValue(""));
+    $("#disabled-select").getSelectedOption().shouldHave(text("-- Select the frozen --"));
+  }
+
+  @Test
+  void canCheckTextOfDisabledSelect() {
+    $("#disabled-select").shouldHave(text("-- Select the frozen --"));
+  }
+
+  @Test
+  void canWaitUntilSelectsGetsEnabled() {
+    timeout = 1000;
+    $("#disabled-select").shouldBe(disabled);
+    $("#unfroze-me").click();
+    $("#disabled-select").selectOption("Anna");
+    $("#disabled-select").getSelectedOption().shouldHave(text("Anna"));
+    $("#disabled-select").shouldBe(enabled);
   }
 }

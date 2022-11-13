@@ -1,9 +1,27 @@
 # Changelog
 
-## 6.8.2 (released 29.09.2022)
+## 6.10.0 (planned to xx.11.2022), see https://github.com/selenide/selenide/milestone/167?closed=1
+* #1989 support very slow downloading in Firefox  --  see PR #2003
+* #1553 select options using JavaScript  -- see PR #1876;  thanks to Oleg Berezhnoy for PR #1553 (in the end, it affected Selenium)
+* #2007 make $.click(options) chainable  --  see PR #2008
+* make ClickOptions overridable (to be used in selenide-appium)
+* #2010 Don't change pageLoadTimeout if it is negative  --  thanks Boris Osipov for PR 
+* bump Selenium from 4.5.0 to 4.6.0, see https://www.selenium.dev/blog/2022/selenium-4-6-0-released/
+* bump WebDriverManager from 5.3.0 to 5.3.1, see https://github.com/bonigarcia/webdrivermanager/blob/master/CHANGELOG.md#531---2022-11-04
+* Bump browserup-proxy-core from 2.2.3 to 2.2.5, see https://github.com/valfirst/browserup-proxy/blob/master/CHANGELOG.md
+* Bump nettyVersion from 4.1.82.Final to 4.1.85.Final
+* #2014 Bump httpclient5 from 5.1.3 to 5.2
+
+## 6.9.0 (released 07.10.2022)
+* #1254 add methods to mock any server response in Selenide proxy  --  see PR #1978
+* #1974 Selenide proxy now adds Authorization header only for specified domain -- see PR #1975
+* #1970 improve resolving proxy host name
 * #1967 upgrade to selenium 4.5.0 -- see https://github.com/SeleniumHQ/selenium/blob/trunk/java/CHANGELOG
 * #1967 remove Opera support
-* #1967 bump slf4j from 2.0.2 to 2.0.3
+* #1971 Disable logging for getAlias method  --  thanks to Reserved Word for the pull request
+* #1977 add setting "connection timeout" in addition to "read timeout"
+* #1969 bump slf4j from 2.0.2 to 2.0.3
+* #1254 bump littleproxy from 2.0.12 to 2.0.13
 
 ## 6.8.1 (released 27.09.2022)
 * #1965 restore "opentelemetry" dependency

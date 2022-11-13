@@ -1,16 +1,17 @@
 ext {
-  seleniumVersion = '4.5.0'
+  seleniumVersion = '4.6.0'
   junitVersion = '5.9.1'
   jettyVersion = '9.4.49.v20220914'
-  nettyVersion = '4.1.82.Final'
+  nettyVersion = '4.1.85.Final'
   assertjVersion = '3.23.1'
-  mockitoVersion = '4.8.0'
+  mockitoVersion = '4.8.1'
   slf4jVersion = '2.0.3'
-  browserupProxyVersion = '2.2.3'
-  littleProxyVersion = '2.0.12'
+  browserupProxyVersion = '2.2.5'
+  littleProxyVersion = '2.0.13'
   commonsFileuploadVersion = '1.4'
-  jabelVersion = '0.4.2'
-  byteBuddyVersion = '1.12.17'
+  jabelVersion = '1.0.0'
+  byteBuddyVersion = '1.12.18'
+  archunitVersion = '1.0.0'
 }
 
 subprojects {
@@ -42,6 +43,7 @@ subprojects {
     testImplementation("io.netty:netty-codec:$nettyVersion")
     testImplementation("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
     testImplementation("commons-fileupload:commons-fileupload:${commonsFileuploadVersion}")
+    testImplementation("com.tngtech.archunit:archunit-junit5:${archunitVersion}")
     api("org.slf4j:slf4j-api:$slf4jVersion")
     testRuntimeOnly("org.slf4j:slf4j-simple:$slf4jVersion")
   }

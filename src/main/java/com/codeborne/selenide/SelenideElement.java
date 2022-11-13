@@ -877,33 +877,37 @@ public interface SelenideElement extends WebElement, WrapsDriver, WrapsElement, 
    * Select an option from dropdown list (by index)
    *
    * @param index 0..N (0 means first option)
+   * @param otherIndexes other indexes (if you need to select multiple options)
    * @see com.codeborne.selenide.commands.SelectOptionByTextOrIndex
    */
-  void selectOption(int... index);
+  void selectOption(int index, int... otherIndexes);
 
   /**
    * Select an option from dropdown list (by text)
    *
    * @param text visible text of option
+   * @param otherTexts other texts (if you need to select multiple options)
    * @see com.codeborne.selenide.commands.SelectOptionByTextOrIndex
    */
-  void selectOption(String... text);
+  void selectOption(String text, String... otherTexts);
 
   /**
    * Select an option from dropdown list that contains given text
    *
    * @param text substring of visible text of option
+   * @param otherTexts other texts (if you need to select multiple options)
    * @see com.codeborne.selenide.commands.SelectOptionContainingText
    */
-  void selectOptionContainingText(String text);
+  void selectOptionContainingText(String text, String... otherTexts);
 
   /**
    * Select an option from dropdown list (by value)
    *
    * @param value "value" attribute of option
+   * @param otherValues other values (if you need to select multiple options)
    * @see com.codeborne.selenide.commands.SelectOptionByValue
    */
-  void selectOptionByValue(String... value);
+  void selectOptionByValue(String value, String... otherValues);
 
   /**
    * Find (first) selected option from this select field
@@ -920,7 +924,6 @@ public interface SelenideElement extends WebElement, WrapsDriver, WrapsElement, 
    *
    * @return ElementsCollection for selected &lt;option&gt; elements (empty list if no options are selected)
    * @see com.codeborne.selenide.commands.GetSelectedOptions
-   * @see <a href="https://github.com/selenide/selenide/wiki/do-not-use-getters-in-tests">NOT RECOMMENDED</a>
    */
   @CheckReturnValue
   @Nonnull
@@ -1132,7 +1135,7 @@ public interface SelenideElement extends WebElement, WrapsDriver, WrapsElement, 
    *
    * @see com.codeborne.selenide.commands.Click
    */
-  void click(ClickOptions clickOption);
+  SelenideElement click(ClickOptions clickOption);
 
   /**
    * Click the element
